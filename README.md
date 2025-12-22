@@ -1,4 +1,4 @@
-# System Analizy Jakości Życia w Polsce (Dobrostan-PL) :shamrock:
+# Wskaźnik Kompozytowy Jakości Życia Dla Polskich Powiatów (Dobrostan-PL) :shamrock:
 
 ## Spis treści
 * [Charakterystyka oprogramowania](#charakterystyka-oprogramowania)

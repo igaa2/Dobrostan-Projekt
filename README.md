@@ -19,7 +19,19 @@ System `DobrostanPL` to narzędzie analityczne służące do oceny i porównywan
 
 ## Specyfikacja wymagań
 
+*Wymagania funkcjonalne zdefiniowane w formie historyjek użytkownika (User Stories).*
 
+### Moduł Danych i Obliczeń (Backend)
+1.  **US-01:** Jako **Administrator Systemu**, chcę, aby aplikacja **automatycznie pobierała dane z API Banku Danych Lokalnych (GUS)**, aby wskaźniki opierały się na oficjalnych i najbardziej aktualnych statystykach.
+2.  **US-02:** Jako **Analityk**, chcę, aby system **normalizował dane wejściowe (sprowadzał do wspólnej skali)**, aby możliwe było poprawne obliczenie wskaźnika kompozytowego dla różnych typów danych (np. zarobki w PLN i zanieczyszczenie w µg/m³).
+
+### Moduł Interfejsu i Prezentacji (Frontend)
+3.  **US-03:** Jako **Użytkownik Szukający Miejsca do Życia**, chcę **zobaczyć ranking powiatów posortowany według jakości życia**, aby szybko zidentyfikować najlepsze regiony do zamieszkania.
+4.  **US-04:** Jako **Użytkownik**, chcę **mieć możliwość zmiany wag poszczególnych kryteriów (np. zwiększyć ważność "Bezpieczeństwa", a zmniejszyć "Ekonomii")**, aby obliczony wskaźnik kompozytowy odpowiadał moim osobistym preferencjom.
+5.  **US-05:** Jako **Użytkownik**, chcę **zobaczyć wyniki na interaktywnej mapie Polski**, aby łatwiej ocenić rozkład jakości życia w interesującym mnie województwie.
+6.  **US-06:** Jako **Użytkownik**, chcę **porównać dwa wybrane powiaty w widoku "obok siebie"**, aby wyraźnie zobaczyć różnice w konkretnych składowych wskaźnika.
+
+## Architektura oprogramowania
 
 ### Architektura rozwoju
 *Stos technologiczny wykorzystywany podczas tworzenia oprogramowania.*
@@ -31,7 +43,7 @@ System `DobrostanPL` to narzędzie analityczne służące do oceny i porównywan
 |  |  |  |
 |  |  |  |
 
-### Architektura oprogramowania
+### Architektura uruchomieniowa
 *Technologie wymagane do działania systemu w środowisku docelowym.*
 
 | Nazwa Technologii | Przeznaczenie | Wersja |

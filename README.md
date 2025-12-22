@@ -31,7 +31,7 @@ Celem oprogramowania jest
 |  |  |  |
 |  |  |  |
 
-## Architektura oprogramowania
+### Architektura oprogramowania
 *Technologie wymagane do działania systemu w środowisku docelowym.*
 
 | Nazwa Technologii | Przeznaczenie | Wersja |

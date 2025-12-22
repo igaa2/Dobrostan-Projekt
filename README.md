@@ -35,7 +35,7 @@ Głównym celem projektu jest dostarczenie użytkownikowi rzetelnej informacji o
 
 **US-05:** Jako **Użytkownik**, chcę **zobaczyć wyniki na interaktywnej mapie Polski**, aby łatwiej ocenić rozkład jakości życia w interesującym mnie województwie.
 
-**US-06:** Jako **Użytkownik**, chcę **porównać dwa wybrane powiaty w widoku "obok siebie"**, aby wyraźnie zobaczyć różnice w konkretnych składowych wskaźnika.
+**US-06:** Jako **Użytkownik**, chcę **porównać dwa wybrane województwa w widoku "obok siebie"**, aby wyraźnie zobaczyć różnice w konkretnych składowych wskaźnika.
 
 ## Architektura oprogramowania
 

@@ -23,13 +23,13 @@ Głównym celem projektu jest dostarczenie użytkownikowi rzetelnej informacji o
 
 *Wymagania funkcjonalne zdefiniowane w formie historyjek użytkownika (User Stories).*
 
-Moduł Danych i Obliczeń (Backend)
+### Moduł Danych i Obliczeń (Backend)
 
 > **US-01:** Jako **Administrator Systemu**, chcę, aby aplikacja **automatycznie pobierała dane z API Banku Danych Lokalnych (GUS)**, aby wskaźniki opierały się na oficjalnych i najbardziej aktualnych statystykach.
 
 > **US-02:** Jako **Analityk**, chcę, aby system **normalizował dane wejściowe (sprowadzał do wspólnej skali)**, aby możliwe było poprawne obliczenie wskaźnika kompozytowego dla różnych typów danych (np. zarobki w PLN i zanieczyszczenie w µg/m³).
 
-Moduł Interfejsu i Prezentacji (Frontend)
+### Moduł Interfejsu i Prezentacji (Frontend)
 
 > **US-03:** Jako **Użytkownik Szukający Miejsca do Życia**, chcę **zobaczyć ranking powiatów posortowany według jakości życia**, aby szybko zidentyfikować najlepsze regiony do zamieszkania.
 

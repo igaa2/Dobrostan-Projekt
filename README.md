@@ -8,7 +8,7 @@
 * [Testy](#testy)
 
 ## Charakterystyka oprogramowania
-System `DobrostanPL` to narzędzie analityczne służące do oceny i porównywania jakości życia w powiatach na terenie Polski. Aplikacja integruje dane statystyczne z Głównego Urzędu Statystycznego, aby na ich podstawie generować rankingi oraz wizualizacje mapowe. Głównym celem projektu jest dostarczenie użytkownikowi rzetelnej informacji o tym, gdzie w Polsce panują najlepsze warunki do życia, z uwzględnieniem spersonalizowanych kryteriów
+System `DobrostanPL` to narzędzie analityczne służące do oceny i porównywania jakości życia w powiatach na terenie Polski. Aplikacja dynamicznie integruje się z publicznym API Banku Danych Lokalnych (Główny Urząd Statystyczny), co gwarantuje dostęp do oficjalnych i najbardziej aktualnych wskaźników statystycznych. Na ich podstawie generowane są rankingi oraz wizualizacje mapowe. Głównym celem projektu jest dostarczenie użytkownikowi rzetelnej informacji o tym, gdzie w Polsce panują najlepsze warunki do życia, z uwzględnieniem spersonalizowanych kryteriów.
 
 ## Prawa autorskie
 * **Autorzy oprogramowania:**

@@ -1,0 +1,20 @@
+base_var_metadata_url: https://bdl.stat.gov.pl/api/v1/variables
+base_var_data_url: https://bdl.stat.gov.pl/api/v1/data/by-variable
+params:
+  unit-level: 2
+  format: json
+  page-size: 16
+var_ids:
+  - 7737
+  - 1725015
+  - 155037
+  - 1609531
+  - 454185
+  - 1365344
+  - 1632971
+  - 60189
+  - 288082
+  - 1724791
+  - 1606668
+  - 454050
+max_retries: 3

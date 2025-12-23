@@ -33,7 +33,7 @@ Głównym celem projektu jest dostarczenie użytkownikowi rzetelnej informacji o
 
 > **US-03:** Jako **Użytkownik Szukający Miejsca do Życia**, chcę **zobaczyć ranking powiatów posortowany według jakości życia**, aby szybko zidentyfikować najlepsze regiony do zamieszkania.
 
-> **US-04:** Jako **Użytkownik**, chcę **mieć możliwość zmiany wag poszczególnych kryteriów (np. zwiększyć ważność "Bezpieczeństwa", a zmniejszyć "Ekonomii")**, aby obliczony wskaźnik kompozytowy odpowiadał moim osobistym preferencjom.
+> **US-04:** Jako **Użytkownik**, chcę **mieć możliwość zmiany wag poszczególnych kryteriów**, aby obliczony wskaźnik kompozytowy odpowiadał moim osobistym preferencjom.
 
 > **US-05:** Jako **Użytkownik**, chcę **zobaczyć wyniki na interaktywnej mapie Polski**, aby łatwiej ocenić rozkład jakości życia w interesującym mnie województwie.
 

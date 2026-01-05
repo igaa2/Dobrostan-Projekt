@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "DOBROSTAN-PROJEKT"
+version = "0.1.0"
+description = "Praca semestralna z Inżynierii oprogramowania"
+readme = "README.md"
+requires-python = "==3.12.*"
+
+authors = [
+    {name = "AG", email = "siema@example.com"}
+]
+
+# Wymagane pakiety
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "streamlit>=1.30",
+    "requests>=2.31",
+    "matplotlib>=3.8",
+]
+
+# Opcjonalne - do developmentu
+[project.optional-dependencies]
+dev = [
+    "black>=23.0",
+]
+
+# Konfiguracja setuptools - KLUCZOWE dla importów z src
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src", "src.*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.yaml", "*.csv"]

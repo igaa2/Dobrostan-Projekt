@@ -3,9 +3,7 @@ params:
   level:
   - 0 # 5 - powiaty 2 - wojewodztwa 0 - Polska
   - 2
-  unit-level: 
-  - 0
-  - 2
+  # unit-level: 2 
   format: json
   page-size: 17
 years_from: 2020

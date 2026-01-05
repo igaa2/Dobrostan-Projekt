@@ -47,7 +47,7 @@ class BDLDatabase:
             """
             )
 
-    def insert_units(self, id_name_tuples: list[tuple]) -> None:
+    def insert_units(self, id_name_tuples: list[tuple[str, str]]) -> None:
         """Wstawia dane jednostek."""
         with self._get_connection() as conn:
             conn.executemany(
@@ -58,29 +58,29 @@ class BDLDatabase:
                 id_name_tuples,
             )
 
-    def insert_variables(self, id_name_tuples: list[tuple]) -> None:
+    def insert_variables(self, id_name_tuples: list[tuple[str, str]]) -> None:
         """Wstawia dane jednostek."""
         with self._get_connection() as conn:
             conn.executemany(
                 """
-                INSERT OR REPLACE INTO units (var_id, name)
+                INSERT OR REPLACE INTO variables (var_id, name)
                 VALUES (?, ?)
                 """,
                 id_name_tuples,
             )
 
     def insert_raw_data(
-        self, var_id: str, unit_id: str, year: int, value: float
+        self, raw_data_tuple: list[tuple[str, str, int, float]]
     ) -> None:
         """Wstawia lub aktualizuje dane."""
         with self._get_connection() as conn:
-            conn.execute(
+            conn.executemany(
                 """
                 INSERT OR REPLACE INTO raw_data 
                 (var_id, unit_id, year, value)
                 VALUES (?, ?, ?, ?)
                 """,
-                (var_id, unit_id, year, value),
+                raw_data_tuple,
             )
 
     def get_df(
@@ -112,4 +112,4 @@ if __name__ == "__main__":
     config_path = get_project_root() / "bdl" / "config" / "config.yaml"
     config = load_yaml(config_path)
 
-    bdl_db = BDLDatabase(config)
+    db = BDLDatabase(config)

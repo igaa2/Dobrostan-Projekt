@@ -1,20 +1,20 @@
 base_var_metadata_url: https://bdl.stat.gov.pl/api/v1/variables
 base_var_data_url: https://bdl.stat.gov.pl/api/v1/data/by-variable
 params:
-  unit-level: 2
+  unit-level: 2 # 5 - powiaty 2 - wojewodztwa 0 - Polska
   format: json
   page-size: 16
 var_ids:
-  - 7737
-  - 1725015
-  - 155037
-  - 1609531
-  - 454185
-  - 1365344
-  - 1632971
-  - 60189
-  - 288082
-  - 1724791
-  - 1606668
-  - 454050
+  - 7737 # Przeciętne miesięczne wydatki w tysiącach złotych na jedną osobę
+  - 1725015 # Wskaźnik urbanizacji w procentach
+  - 155037 # Poszkodowani w wypadkach przy pracy na 10 tysięcy pracujących
+  - 1609531 # Liczba zatrudnionych na stanowiskach pracy, w których wyeliminowano lub ograniczono ryzyko zawodowe na stu zatrudnionych w zakładach objętych badaniem
+  - 454185 # Liczba lekarzy przypadająca na 10 tysięcy ludności
+  - 1365344 # Liczba prób samobójczych 100 tysięcy ludności
+  - 1632971 # Wskaźnik osób dorosłych uczestniczących w kształceniu lub szkoleniu w wieku 25-64 lata w procentach
+  - 60189 # Księgozbiór bibliotek na 10 ludności
+  - 288082 # Długość drogi dla rowerów na 100 tysięcy ludności
+  - 1724791 # Powierzchnia parków, zieleńców i terenów zieleni osiedlowej na 1 mieszkańca w metrach kwadratowych
+  - 1606668 # Subiektywna pozytywna (dobra) ocena sytuacji materialnej gospodarstw domowych w procentach
+  - 454050 # Subiektywna pozytywna (raczej dobra) ocena sytuacji materialnej gospodarstw domowych w procentach
 max_retries: 3

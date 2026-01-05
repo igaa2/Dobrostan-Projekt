@@ -1,5 +1,5 @@
 Data is provided by the API for a single variable
-across multiple territorial units
+across multiple territorial units.
 
 5 - powiaty 2 - wojewodztwa 0 - Polska
 

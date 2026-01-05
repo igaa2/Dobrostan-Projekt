@@ -1,0 +1,19 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    
+    "python.terminal.activateEnvironment": true,
+    
+    "terminal.integrated.env.windows": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONIOENCODING": "utf-8"
+    },
+    
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
+}

@@ -9,12 +9,11 @@ class BDLDatabase:
     def __init__(self, config: dict):
         db_name = config.get("database_name", f"db_{get_current_time_string()}")
         self.db_path = get_project_root() / "bdl" / "database" / db_name
-        self._init_db()
 
     def _get_connection(self):
         return sqlite3.connect(self.db_path)
 
-    def _init_db(self):
+    def init_db(self):
         """Tworzy strukturę bazy danych."""
         with self._get_connection() as conn:
             conn.executescript(
@@ -83,7 +82,7 @@ class BDLDatabase:
                 raw_data_tuple,
             )
 
-    def get_df(
+    def get_raw_data(
         self, var_id: str = None, unit_id: str = None, years: list = None
     ) -> pd.DataFrame:
         """Pobiera dane z filtrami."""
@@ -102,6 +101,10 @@ class BDLDatabase:
         if years:
             query += f" AND d.year IN ({', '.join(years)})"
 
+        with self._get_connection() as conn:
+            return pd.read_sql_query(query, conn)
+
+    def get_query(self, query: str) -> pd.DataFrame:
         with self._get_connection() as conn:
             return pd.read_sql_query(query, conn)
 

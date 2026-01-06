@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from dataclasses import dataclass
 from enum import Enum
 
 
@@ -13,20 +12,53 @@ class NormalizationScope(Enum):
     # w opraciu o wszytskie wartości dla niej - trend wzrostowy
 
 
-class MinMaxNormalizer:
-    """Normalizacja Min-Max do zakresu [0, 1] według wzoru: (x - min) / (max - min)."""
+class NormalizationMethod(Enum):
+    """Metody normalizacji."""
 
-    def __init__(self, scope: NormalizationScope = NormalizationScope.PER_YEAR):
+    MIN_MAX = "min_max"
+    VECTOR = "vector"
+
+
+class Normalizer:
+    """Klasa do przeprowadzenia normalizacji zmiennych. Zawiera normalizację min-max i wektorową."""
+
+    def __init__(
+        self,
+        scope: NormalizationScope = NormalizationScope.PER_YEAR,
+        method: NormalizationMethod = NormalizationMethod.VECTOR,
+    ):
         self.scope = scope
+        self.method = method
 
-    def _normalize_series(self, series: pd.Series) -> list:
-        """Normalizuje pojedynczą serię do [0, 1]."""
+    def _min_max_normalize(self, series: pd.Series) -> list:
+        """Normalizuje pojedynczą serię do [0, 1] według wzoru: (x - min) / (max - min)."""
         min_val = series.min()
         max_val = series.max()
 
         if max_val == min_val:
             return pd.Series(0.5, index=series.index, name=series.name)
         return ((series - min_val) / (max_val - min_val)).values
+
+    def _vector_normalize(self, series: pd.Series) -> list:
+        """Normalizacja wektorowa według wzoru: r = x / √(Σx²)"""
+        print(series)
+        squared = series**2
+        print(series)
+        sum_squared = squared.sum()
+        sqrt_sum = np.sqrt(sum_squared)
+
+        if sqrt_sum == 0:
+            return pd.Series(0.0, index=series.index, name=series.name).values
+        return (series / sqrt_sum).values
+
+    def _normalize_series(self, series: pd.Series) -> pd.Series:
+        """Normalizuje serię wybraną metodą."""
+        if self.method == NormalizationMethod.VECTOR:
+            return self._vector_normalize(series)
+        elif self.method == NormalizationMethod.MIN_MAX:
+            return self._min_max_normalize(series)
+        else:
+            pass
 
     def normalize_raw_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -36,7 +68,7 @@ class MinMaxNormalizer:
             var_id | unit_id | year | value
 
         Zwracany format:
-            var_id | unit_id | year | value | value_normalized | scope
+            var_id | unit_id | year | value | value_normalized | scope | method
         """
         df = df.copy()
         df["value_normalized"] = np.nan
@@ -46,13 +78,15 @@ class MinMaxNormalizer:
             df["value_normalized"] = df.groupby(["var_id", "year"])["value"].transform(
                 self._normalize_series
             )
-            df["scope"] = NormalizationScope.PER_YEAR.value
+            df["scope"] = self.scope.value
+            df["method"] = self.method.value
         elif self.scope == NormalizationScope.PER_VARIABLE:
             # Normalizacja dla każdej zmiennej (wszystkie lata razem)
             df["value_normalized"] = df.groupby(["var_id"])["value"].transform(
                 self._normalize_series
             )
-            df["scope"] = NormalizationScope.PER_VARIABLE.value
+            df["scope"] = self.scope.value
+            df["method"] = self.method.value
         else:
             pass
 
@@ -63,49 +97,12 @@ if __name__ == "__main__":
     df = pd.DataFrame(
         {
             "var_id": [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
-            "unit_id": [
-                "M",
-                "S",
-                "W",
-                "M",
-                "S",
-                "W",
-                "M",
-                "S",
-                "W",
-                "M",
-                "S",
-                "W",
-            ],
-            "year": [
-                2022,
-                2022,
-                2022,
-                2022,
-                2022,
-                2022,
-                2023,
-                2023,
-                2023,
-                2023,
-                2023,
-                2023,
-            ],
-            "value": [
-                72000,
-                40000,
-                35000,
-                3.2,
-                9.8,
-                5.2,
-                75000,
-                45000,
-                55000,
-                5.2,
-                7.8,
-                4.5,
-            ],
+            "unit_id": ["M", "S", "W", "M", "S", "W", "M", "S", "W", "M", "S", "W"],
+            "year": [2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3],
+            "value": [72, 40, 25, 3.2, 9.8, 5.2, 75, 45, 55, 5.2, 7.8, 4.5],
         }
     )
-    MMN = MinMaxNormalizer(scope=NormalizationScope.PER_VARIABLE)
+    MMN = Normalizer(
+        scope=NormalizationScope.PER_VARIABLE, method=NormalizationMethod.VECTOR
+    )
     print(MMN.normalize_raw_data(df))

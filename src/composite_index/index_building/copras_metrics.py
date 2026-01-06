@@ -276,7 +276,7 @@ def print_copras_result(result: CoprasResult) -> None:
     print(f"Destymulanty: {dest}")
 
     # Wagi
-    print(f"\nWagi:")
+    print("\nWagi:")
     for var_id, weight in result.weights.items():
         direction = result.directions.get(var_id, "?")
         print(f"  {var_id}: {weight:.4f} ({direction})")
@@ -302,7 +302,11 @@ def print_copras_result(result: CoprasResult) -> None:
 
 if __name__ == "__main__":
     import pandas as pd
-    from copras import CoprasCalculator, VariableDirection, print_copras_result
+    from src.composite_index.index_building.copras_metrics import (
+        CoprasCalculator,
+        VariableDirection,
+        print_copras_result,
+    )
 
     # Dane znormalizowane
     df = pd.DataFrame(

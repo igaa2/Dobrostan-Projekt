@@ -75,6 +75,7 @@ class BDLClient:
         r.raise_for_status()
         return r.json()
 
+    # TODO mozna podmienic by do bazy danych od razu wrzucało - a nie po całej pętli
     def _get_variables_data(self) -> dict:
         unit_levels = self.params.get("level", [])
         data = {}
@@ -102,6 +103,9 @@ class BDLClient:
             for v in unit.get("values", [])
         ]
 
+
+# TODO można dopisać pobieranie konkretnego roku czy coś
+# i odświeżanie wtedy za pomocą strealit też tu (mało zapytań)
 
 if __name__ == "__main__":
     from src.utils.utils import load_yaml, get_project_root

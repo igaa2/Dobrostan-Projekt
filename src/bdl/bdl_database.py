@@ -1,6 +1,9 @@
 import sqlite3
 import pandas as pd
 from src.utils.utils import get_project_root, get_current_time_string
+from src.composite_index.data_preprocessing.variable_validator import (
+    VariableValidationResult,
+)
 
 
 class BDLDatabase:
@@ -13,12 +16,12 @@ class BDLDatabase:
     def _get_connection(self):
         return sqlite3.connect(self.db_path)
 
-    def init_db(self):
+    def init_db(self) -> None:
         """Tworzy strukturę bazy danych."""
         with self._get_connection() as conn:
             conn.executescript(
                 """
-                -- Wojewodztwa
+                -- Jednostki
                 CREATE TABLE IF NOT EXISTS units (
                     unit_id TEXT PRIMARY KEY,
                     name TEXT NOT NULL
@@ -30,7 +33,7 @@ class BDLDatabase:
                     name TEXT NOT NULL
                 );
 
-                -- Dane
+                -- Surowe dane
                 CREATE TABLE IF NOT EXISTS raw_data (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     var_id TEXT NOT NULL,
@@ -43,11 +46,29 @@ class BDLDatabase:
                     FOREIGN KEY (unit_id) REFERENCES units(unit_id),
                     UNIQUE(var_id, unit_id, year)
                 );
+
+                -- Metryki jakości zmiennych
+                CREATE TABLE IF NOT EXISTS variable_quality (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    var_id INTEGER NOT NULL,
+                    year INTEGER NOT NULL,
+                    na REAL, -- udział braków (0 do 1)
+                    cv REAL, -- współczynnik zmienności
+                    skewness REAL, -- skośność
+                    na_status TEXT, -- ✓ PASSED / ✗ FAILED
+                    cv_status TEXT, -- ✓ PASSED / ✗ FAILED
+                    skewness_status TEXT, -- ✓ PASSED / ✗ FAILED
+                    overall_status TEXT, -- ✓ PASSED / ✗ FAILED
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+                    FOREIGN KEY (var_id) REFERENCES variables(var_id),
+                    UNIQUE (var_id, year)
+                );
             """
             )
 
     def insert_units(self, id_name_tuples: list[tuple[str, str]]) -> None:
-        """Wstawia dane jednostek."""
+        """Wstawia nazwy jednostek."""
         with self._get_connection() as conn:
             conn.executemany(
                 """
@@ -58,7 +79,7 @@ class BDLDatabase:
             )
 
     def insert_variables(self, id_name_tuples: list[tuple[str, str]]) -> None:
-        """Wstawia dane jednostek."""
+        """Wstawia nazwy zmiennych."""
         with self._get_connection() as conn:
             conn.executemany(
                 """
@@ -82,8 +103,24 @@ class BDLDatabase:
                 raw_data_tuple,
             )
 
+    def insert_variable_quality(
+        self, variable_quality: VariableValidationResult
+    ) -> None:
+        """Wstawia lub aktualizuje dane."""
+        with self._get_connection() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO variable_quality (
+                    var_id, year, na, cv, skewness,
+                    na_status, cv_status, skewness_status, overall_status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                variable_quality.to_tuple(),
+            )
+
     def get_raw_data(
-        self, var_id: str = None, unit_id: str = None, years: list = None
+        self, var_id: str = None, unit_id: str = None, year: int | list[int] = None
     ) -> pd.DataFrame:
         """Pobiera dane z filtrami."""
         query = """
@@ -98,8 +135,8 @@ class BDLDatabase:
             query += f" AND d.var_id = {var_id}"
         if unit_id:
             query += f" AND d.unit_id = {unit_id}"
-        if years:
-            query += f" AND d.year IN ({', '.join(years)})"
+        if year:
+            query += f" AND d.year IN ({', '.join(map(str, year)) if type(year) is list else year})"
 
         with self._get_connection() as conn:
             return pd.read_sql_query(query, conn)
@@ -107,6 +144,22 @@ class BDLDatabase:
     def get_query(self, query: str) -> pd.DataFrame:
         with self._get_connection() as conn:
             return pd.read_sql_query(query, conn)
+
+    def get_var_latest_year(self, var_id: int) -> int | None:
+        """Zwraca największy dostępny rok dla danej zmiennej."""
+        query = "SELECT MAX(year) FROM raw_data WHERE var_id = ?"
+        with self._get_connection() as conn:
+            result = conn.execute(
+                query, (var_id,)
+            ).fetchone()  # fetchone() zwraca tuple
+        return result[0] if result else None
+
+    def get_available_variables(self) -> list[int]:
+        """Zwraca dostępne zmienne."""
+        query = "SELECT DISTINCT var_id FROM raw_data ORDER BY var_id"
+        with self._get_connection() as conn:
+            result = conn.execute(query).fetchall()  # fetchall() zwraca tuple
+        return [row[0] for row in result]
 
 
 if __name__ == "__main__":

@@ -87,7 +87,7 @@ class BDLDatabase:
     ) -> pd.DataFrame:
         """Pobiera dane z filtrami."""
         query = """
-            SELECT v.name, u.name, d.year, d.value
+            SELECT v.var_id, v.name, u.unit_id, u.name, d.year, d.value
             FROM raw_data d
             JOIN variables v ON d.var_id = v.var_id
             JOIN units u ON d.unit_id = u.unit_id

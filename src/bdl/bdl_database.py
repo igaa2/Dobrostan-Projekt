@@ -64,6 +64,23 @@ class BDLDatabase:
                     FOREIGN KEY (var_id) REFERENCES variables(var_id),
                     UNIQUE (var_id, year)
                 );
+
+                -- Znormalizowane dane
+                CREATE TABLE IF NOT EXISTS normalized_data (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    var_id TEXT NOT NULL,
+                    unit_id TEXT NOT NULL,
+                    year INTEGER,
+                    value REAL,
+                    value_normalized REAL,
+                    scope TEXT,
+                    method TEXT,
+                    normalized_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    
+                    FOREIGN KEY (var_id) REFERENCES variables(var_id),
+                    FOREIGN KEY (unit_id) REFERENCES units(unit_id),
+                    UNIQUE(var_id, unit_id, year, scope, method)
+                );
             """
             )
 
@@ -119,6 +136,28 @@ class BDLDatabase:
                 variable_quality.to_tuple(),
             )
 
+    def insert_normalized_data(self, normalized_data: pd.DataFrame) -> None:
+        """Wstawia lub aktualizuje dane."""
+        with self._get_connection() as conn:
+            conn.executemany(
+                """
+                INSERT OR REPLACE INTO normalized_data 
+                (var_id, unit_id, year, value, value_normalized, scope, method)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                normalized_data[
+                    [
+                        "var_id",
+                        "unit_id",
+                        "year",
+                        "value",
+                        "value_normalized",
+                        "scope",
+                        "method",
+                    ]
+                ].itertuples(index=False),
+            )
+
     def get_raw_data(
         self, var_id: str = None, unit_id: str = None, year: int | list[int] = None
     ) -> pd.DataFrame:
@@ -143,7 +182,10 @@ class BDLDatabase:
 
     def get_query(self, query: str) -> pd.DataFrame:
         with self._get_connection() as conn:
-            return pd.read_sql_query(query, conn)
+            try:
+                return pd.read_sql_query(query, conn)
+            except TypeError:  # NoneType object, gdy nie zwraca tabeli
+                conn.execute(query)
 
     def get_var_latest_year(self, var_id: int) -> int | None:
         """Zwraca największy dostępny rok dla danej zmiennej."""

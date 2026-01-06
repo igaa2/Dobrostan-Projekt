@@ -4,4 +4,3 @@
 
 # korelacja
 # liczba w bazie lat i unitow - co z brakami
-# validacja ostatniego roku

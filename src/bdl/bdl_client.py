@@ -24,7 +24,7 @@ class BDLClient:
         self.variables = config["variables"]
         self.years_from = config.get("years_from", 2020)
         self.timeout = (10, 30)
-        self.time_to_sleep = 10
+        self.time_to_sleep = 3
 
     def close_session(self):
         """Zamyka sesję, jeśli została utworzona."""

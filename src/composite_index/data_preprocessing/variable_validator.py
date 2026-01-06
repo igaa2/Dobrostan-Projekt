@@ -57,17 +57,20 @@ class VariableValidator:
         self.skewness_min = skewness_min
         self.skewness_max = skewness_max
 
-    def _calculate_na(self, values: pd.Series) -> float:
+    @staticmethod
+    def calculate_na(values: pd.Series) -> float:
         """Oblicza udział braków"""
         n = len(values)
         return 1.0 if n == 0 else float(values.isna().sum() / n)
 
-    def _calculate_cv(self, values: pd.Series) -> float:
+    @staticmethod
+    def calculate_cv(values: pd.Series) -> float:
         """Oblicza współczynnik zmienności = odchylenie std / średnia."""
         mean = values.mean()
-        return float("nan") if mean < 1e-10 else float(values.std() / abs(mean))
+        return 0.0 if mean < 1e-10 else float(values.std() / abs(mean))
 
-    def _calculate_skewness(self, values: pd.Series) -> float:
+    @staticmethod
+    def calculate_skewness(values: pd.Series) -> float:
         """
         Oblicza współczynnik skośności (Fisher).
         0 - rozkład symetryczny
@@ -81,9 +84,9 @@ class VariableValidator:
     ) -> VariableValidationResult:
         """Pełna walidacja."""
         clean_values = values.dropna()
-        na = self._calculate_na(clean_values)
-        cv = self._calculate_cv(clean_values)
-        skewness = self._calculate_skewness(clean_values)
+        na = VariableValidator.calculate_na(clean_values)
+        cv = VariableValidator.calculate_cv(clean_values)
+        skewness = VariableValidator.calculate_skewness(clean_values)
 
         na_status = (
             ValidationStatus.PASSED if na <= self.na_max else ValidationStatus.WARNING

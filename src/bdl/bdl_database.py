@@ -71,11 +71,26 @@ class BDLDatabase:
                     var_id TEXT NOT NULL,
                     unit_id TEXT NOT NULL,
                     year INTEGER,
-                    value REAL,
                     value_normalized REAL,
                     scope TEXT,
                     method TEXT,
                     normalized_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    
+                    FOREIGN KEY (var_id) REFERENCES variables(var_id),
+                    FOREIGN KEY (unit_id) REFERENCES units(unit_id),
+                    UNIQUE(var_id, unit_id, year, scope, method)
+                );
+
+                -- Ważone dane
+                CREATE TABLE IF NOT EXISTS weighted_data (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    var_id TEXT NOT NULL,
+                    unit_id TEXT NOT NULL,
+                    year INTEGER,
+                    value_weighted REAL,
+                    scope TEXT,
+                    method TEXT,
+                    weighted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     
                     FOREIGN KEY (var_id) REFERENCES variables(var_id),
                     FOREIGN KEY (unit_id) REFERENCES units(unit_id),
@@ -142,16 +157,36 @@ class BDLDatabase:
             conn.executemany(
                 """
                 INSERT OR REPLACE INTO normalized_data 
-                (var_id, unit_id, year, value, value_normalized, scope, method)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (var_id, unit_id, year, value_normalized, scope, method)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 normalized_data[
                     [
                         "var_id",
                         "unit_id",
                         "year",
-                        "value",
                         "value_normalized",
+                        "scope",
+                        "method",
+                    ]
+                ].itertuples(index=False),
+            )
+
+    def insert_weighted_data(self, normalized_data: pd.DataFrame) -> None:
+        """Wstawia lub aktualizuje dane w tabeli weighted_data."""
+        with self._get_connection() as conn:
+            conn.executemany(
+                """
+                INSERT OR REPLACE INTO weighted_data 
+                (var_id, unit_id, year, value_weighted, scope, method)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                normalized_data[
+                    [
+                        "var_id",
+                        "unit_id",
+                        "year",
+                        "value_weighted",
                         "scope",
                         "method",
                     ]

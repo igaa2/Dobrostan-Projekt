@@ -3,21 +3,16 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "DOBROSTAN-PROJEKT"
+name = "dobrostan-projekt"
 version = "0.1.0"
 description = "Praca semestralna z Inżynierii oprogramowania"
 readme = "README.md"
 requires-python = "==3.12.*"
 
-authors = [
-    {name = "AG", email = "siema@example.com"}
-]
-
-# Wymagane pakiety
 dependencies = [
     "loguru==0.7.3",
     "matplotlib==3.10.8",
-    "numpy==2.4.0",
+    "numpy==2.3.0",
     "pandas==2.3.3",
     "PyYAML==6.0.3",
     "requests==2.32.5",
@@ -27,16 +22,19 @@ dependencies = [
     "urllib3==2.6.2",
 ]
 
-# Opcjonalne - do developmentu
 [project.optional-dependencies]
 dev = [
     "black==25.12.0",
 ]
 
-# Konfiguracja setuptools - KLUCZOWE dla importów z src
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+# Konfiguracja setuptools - import z src w formie modulu
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src", "src.*"]
+where = ["src"]  # start with src catalog
+include = ["src", "src.**"]
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yaml", "*.csv"]

@@ -6,6 +6,8 @@ import plotly.express as px
 from src.dashboard.dashboards_utils import (
     generate_slider,
     generate_barplot,
+    create_radar_chart,
+    create_map,
     generate_toggle,
     get_keys,
     reset,
@@ -108,6 +110,32 @@ def oblicz_wskaznik(df: pd.DataFrame) -> pd.DataFrame:
     return df_wynik
 
 
+LATA = list(range(2018, 2025))  # 2018-2024
+
+
+@st.cache_data
+def generuj_dane_czasowe() -> pd.DataFrame:
+    """Generuje dane dla województw w czasie."""
+    np.random.seed(42)
+
+    dane = []
+    for woj in WOJEWODZTWA:
+        # Bazowe wartości dla województwa
+        baza = {klucz: np.random.uniform(30, 70) for klucz in ZMIENNE.keys()}
+
+        for rok in LATA:
+            wiersz = {"wojewodztwo": woj, "rok": rok}
+            # Trend + losowy szum
+            for klucz, wartosc_bazowa in baza.items():
+                trend = (rok - 2018) * np.random.uniform(0.5, 2)
+                szum = np.random.uniform(-3, 3)
+                wiersz[klucz] = wartosc_bazowa + trend + szum
+
+            dane.append(wiersz)
+
+    return pd.DataFrame(dane)
+
+
 # ==================== PANEL BOCZNY ====================
 st.sidebar.title("⚙️ Ustawienia zmiennych")
 st.sidebar.caption("Waga | Typ (📈 stymulanta / 📉 destymulanta)")
@@ -193,3 +221,34 @@ with col3:
 
 with col4:
     st.metric("📊 Średnia", f"{df_z_wskaznikiem['wskaznik'].mean():.1f}")
+
+
+# Wybór województw do porównania
+st.subheader("🕸️ Wykres radarowy")
+
+wybrane_woj = st.multiselect(
+    "Wybierz województwa do porównania",
+    options=WOJEWODZTWA,
+    default=["mazowieckie", "małopolskie", "śląskie"],
+    max_selections=5,  # Limit dla czytelności
+)
+
+if wybrane_woj:
+    fig_radar = create_radar_chart(df, wybrane_woj, ZMIENNE)
+    st.plotly_chart(fig_radar, use_container_width=True)
+else:
+    st.warning("Wybierz przynajmniej jedno województwo")
+
+
+# ==================== MAPA ====================
+st.subheader("🗺️ Mapa wskaźnika")
+
+jednostka = "wojewodztwa"  # na potrzeby demo
+# Tworzenie mapy
+if jednostka == "wojewodztwa":
+    fig_map = create_map(df_z_wskaznikiem, jednostka="wojewodztwa")
+    st.plotly_chart(fig_map, use_container_width=True)
+else:
+    st.warning("Dane dla powiatów wymagają osobnego DataFrame")
+    # fig_map = create_map(df_powiaty, jednostka='powiaty', kolumna_nazwy='powiat')
+    # st.plotly_chart(fig_map, use_container_width=True)

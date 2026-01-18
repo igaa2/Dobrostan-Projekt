@@ -83,3 +83,164 @@ def generate_barplot(
     )
 
     return fig
+
+
+import plotly.graph_objects as go
+import plotly.express as px
+
+
+def create_radar_chart(
+    df: pd.DataFrame, wybrane_wojewodztwa: list[str], zmienne: dict[str, str]
+) -> go.Figure:
+    """Tworzy wykres radarowy dla wybranych województw."""
+
+    fig = go.Figure()
+
+    kategorie = list(zmienne.values())
+    klucze = list(zmienne.keys())
+
+    # Paleta kolorów
+    kolory = px.colors.qualitative.Plotly
+
+    for idx, woj in enumerate(wybrane_wojewodztwa):
+        woj_data = df[df["wojewodztwo"] == woj]
+
+        if woj_data.empty:
+            continue
+
+        wartosci = [woj_data[klucz].values[0] for klucz in klucze]
+        wartosci += [wartosci[0]]  # Zamknięcie
+
+        kolor = kolory[idx % len(kolory)]
+
+        fig.add_trace(
+            go.Scatterpolar(
+                r=wartosci,
+                theta=kategorie + [kategorie[0]],
+                fill="toself",
+                name=woj,
+                opacity=0.4,  # Alpha = 0.4
+                line=dict(width=2),
+            )
+        )
+
+    fig.update_layout(
+        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+        showlegend=True,
+        title="Porównanie województw - profil wskaźników",
+        height=600,
+    )
+
+    return fig
+
+
+import json
+import urllib.request
+
+# URLs do GeoJSON
+GEOJSON_URLS = {
+    "wojewodztwa": "https://raw.githubusercontent.com/ppatrzyk/polska-geojson/master/wojewodztwa/wojewodztwa-medium.geojson",
+    "powiaty": "https://raw.githubusercontent.com/ppatrzyk/polska-geojson/master/powiaty/powiaty-medium.geojson",
+}
+
+
+@st.cache_data
+def load_geojson(jednostka: str) -> dict:
+    """Pobiera i cachuje GeoJSON."""
+    url = GEOJSON_URLS[jednostka]
+    with urllib.request.urlopen(url) as response:
+        return json.loads(response.read())
+
+
+def create_map(
+    df: pd.DataFrame,
+    jednostka: str,
+    kolumna_wartosci: str = "wskaznik",
+    kolumna_nazwy: str = "wojewodztwo",
+) -> go.Figure:
+    """
+    Tworzy mapę choropleth Polski.
+
+    Args:
+        df: DataFrame z danymi
+        jednostka: 'wojewodztwa' lub 'powiaty'
+        kolumna_wartosci: nazwa kolumny z wartościami do wizualizacji
+        kolumna_nazwy: nazwa kolumny z nazwami jednostek
+
+    Returns:
+        Wykres Plotly
+    """
+
+    geojson = load_geojson(jednostka)
+
+    # Klucz w GeoJSON zależy od jednostki
+    if jednostka == "wojewodztwa":
+        featureidkey = "properties.nazwa"
+    else:  # powiaty
+        featureidkey = "properties.nazwa"
+
+    fig = px.choropleth(
+        df,
+        geojson=geojson,
+        locations=kolumna_nazwy,
+        featureidkey=featureidkey,
+        color=kolumna_wartosci,
+        color_continuous_scale="RdYlGn",
+        range_color=[0, 100],
+        labels={kolumna_wartosci: "Wskaźnik"},
+        hover_name=kolumna_nazwy,
+        hover_data={kolumna_wartosci: ":.1f"},
+    )
+
+    fig.update_geos(fitbounds="locations", visible=False, bgcolor="rgba(0,0,0,0)")
+
+    fig.update_layout(
+        title=f"Wskaźnik dobrostanu - {jednostka}",
+        height=600,
+        margin={"r": 0, "t": 50, "l": 0, "b": 0},
+        coloraxis_colorbar=dict(title="Wskaźnik", ticksuffix="%"),
+    )
+
+    return fig
+
+
+def create_line_chart_with_avg(
+    df: pd.DataFrame, wybrane_wojewodztwa: list[str]
+) -> go.Figure:
+    """Wykres liniowy ze średnią krajową."""
+
+    df_filtered = df[df["wojewodztwo"].isin(wybrane_wojewodztwa)]
+
+    # Średnia krajowa per rok
+    df_avg = df.groupby("rok")["wskaznik"].mean().reset_index()
+    df_avg["wojewodztwo"] = "Średnia krajowa"
+
+    # Połącz dane
+    df_combined = pd.concat([df_filtered, df_avg], ignore_index=True)
+
+    fig = px.line(
+        df_combined,
+        x="rok",
+        y="wskaznik",
+        color="wojewodztwo",
+        markers=True,
+        title="Wskaźnik dobrostanu w czasie",
+    )
+
+    # Średnia jako linia przerywana
+    fig.for_each_trace(
+        lambda t: (
+            t.update(line=dict(dash="dash", width=3))
+            if t.name == "Średnia krajowa"
+            else t.update(line=dict(width=2))
+        )
+    )
+
+    fig.update_layout(
+        height=500,
+        xaxis=dict(tickmode="linear", dtick=1),
+        yaxis=dict(range=[0, 100]),
+        hovermode="x unified",
+    )
+
+    return fig

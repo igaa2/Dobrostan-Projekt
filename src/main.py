@@ -10,4 +10,6 @@ if __name__ == "__main__":
     valid()
     logger.info("Krok 3: COPRAS.")
     copras()
+    logger.info("Krok 4: DASHBOARD.")
+    # dashboard()
     logger.info("Koniec skryptu.")

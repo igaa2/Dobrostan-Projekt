@@ -118,7 +118,8 @@ st.sidebar.markdown("---")
 
 # Tworzenie wszystkich suwaków
 for var_id, name in ZMIENNE.items():
-    st.sidebar.markdown(f"**{name}**")
+    status = "✅"
+    st.sidebar.markdown(f"**{name}** {status}")
     slider_col, toggle_col = st.sidebar.columns([2, 1])
 
     if f"{prefix_weights}{var_id}" not in st.session_state:

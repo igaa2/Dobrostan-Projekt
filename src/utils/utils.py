@@ -16,6 +16,15 @@ def load_yaml(path: str | Path) -> dict:
         return yaml.safe_load(f)
 
 
+def load_md(path: str | Path) -> str:
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Markdown file not found: {path}")
+
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
 def get_current_time_string() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

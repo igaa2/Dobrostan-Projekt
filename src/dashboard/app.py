@@ -119,7 +119,7 @@ st.sidebar.markdown("---")
 # Tworzenie wszystkich suwaków
 for var_id, name in ZMIENNE.items():
     st.sidebar.markdown(f"**{name}**")
-    slider_col, toggle_col = st.sidebar.columns([4, 1])
+    slider_col, toggle_col = st.sidebar.columns([2, 1])
 
     if f"{prefix_weights}{var_id}" not in st.session_state:
         st.session_state[f"{prefix_weights}{var_id}"] = 50
@@ -137,7 +137,7 @@ reset_weight_col, reset_toggle_col = st.sidebar.columns(2)
 
 with reset_weight_col:
     if st.button(
-        "🔄 Resetuj wagi",
+        "🔄⚖️ Resetuj wagi",
         use_container_width=True,
         on_click=reset,
         kwargs={"prefix": prefix_weights},
@@ -146,7 +146,7 @@ with reset_weight_col:
 
 with reset_toggle_col:
     if st.button(
-        "🔄 Resetuj typy",
+        "🔄📉 Resetuj typy",
         use_container_width=True,
         on_click=reset,
         kwargs={"prefix": prefix_stim},

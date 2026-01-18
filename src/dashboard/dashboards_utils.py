@@ -2,17 +2,31 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from streamlit.delta_generator import DeltaGenerator
 
 
-def generate_slider(prefix: str, var_id: int, name: str) -> float:
+def generate_slider(
+    container: DeltaGenerator, prefix: str, var_id: int, name: str
+) -> float:
     """Tworzy suwak od 0% do 100% w pasku bocznym Streamlit."""
-    return st.sidebar.slider(
+    return container.slider(
         label=name,
         min_value=0,
         max_value=100,
         step=1,
         format="%d%%",
         key=f"{prefix}{var_id}",
+        label_visibility="collapsed",
+    )
+
+
+def generate_toggle(container: DeltaGenerator, prefix: str, var_id: int) -> bool:
+    """Tworzy przełącznik na destymulantę w pasku bocznym Streamlit."""
+    return container.toggle(
+        label="📉",
+        key=f"{prefix}{var_id}",
+        label_visibility="visible",
+        help="OFF = stymulanta, ON = destymulanta",
     )
 
 

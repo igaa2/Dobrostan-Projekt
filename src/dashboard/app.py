@@ -6,6 +6,7 @@ import plotly.express as px
 from src.dashboard.dashboards_utils import (
     generate_slider,
     generate_barplot,
+    generate_toggle,
     get_keys,
     reset,
 )
@@ -13,6 +14,7 @@ from src.utils.utils import get_project_root, load_md, load_yaml
 
 config = load_yaml(get_project_root() / "dashboard" / "config" / "config.yaml")
 prefix_weights = config["state_session_key"]["weight_prefix"]
+prefix_stim = config["state_session_key"]["stim_prefix"]
 
 
 # ==================== KONFIGURACJA STRONY ====================
@@ -107,25 +109,49 @@ def oblicz_wskaznik(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ==================== PANEL BOCZNY ====================
-st.sidebar.title("⚙️ Wagi zmiennych")
-st.sidebar.markdown("Określ, jak ważna jest dla ciebie każda zmienna.")
+st.sidebar.title("⚙️ Ustawienia zmiennych")
+st.sidebar.caption("Waga | Typ (📈 stymulanta / 📉 destymulanta)")
+st.sidebar.markdown(
+    "Ustal ważność zmiennych i wskaż, czy ich wpływ na wynik jest pozytywny (stymulanta) czy negatywny (destymulanta)."
+)
 st.sidebar.markdown("---")
 
 # Tworzenie wszystkich suwaków
 for var_id, name in ZMIENNE.items():
+    st.sidebar.markdown(f"**{name}**")
+    slider_col, toggle_col = st.sidebar.columns([4, 1])
+
     if f"{prefix_weights}{var_id}" not in st.session_state:
         st.session_state[f"{prefix_weights}{var_id}"] = 50
-    generate_slider(prefix=prefix_weights, var_id=var_id, name=name)
+    generate_slider(
+        container=slider_col, prefix=prefix_weights, var_id=var_id, name=name
+    )
 
-# Przycisk resetu
+    if f"{prefix_stim}{var_id}" not in st.session_state:
+        st.session_state[f"{prefix_stim}{var_id}"] = False
+    generate_toggle(container=toggle_col, prefix=prefix_stim, var_id=var_id)
+
+# Przyciski resetów
 st.sidebar.markdown("---")
-if st.sidebar.button(
-    "🔄 Resetuj wagi",
-    use_container_width=True,
-    on_click=reset,
-    kwargs={"prefix": prefix_weights},
-):
-    st.rerun()
+reset_weight_col, reset_toggle_col = st.sidebar.columns(2)
+
+with reset_weight_col:
+    if st.button(
+        "🔄 Resetuj wagi",
+        use_container_width=True,
+        on_click=reset,
+        kwargs={"prefix": prefix_weights},
+    ):
+        st.rerun()
+
+with reset_toggle_col:
+    if st.button(
+        "🔄 Resetuj typy",
+        use_container_width=True,
+        on_click=reset,
+        kwargs={"prefix": prefix_stim},
+    ):
+        st.rerun()
 
 weights = get_keys(prefix=prefix_weights)
 if weights and all(v == 0 for v in weights.values()):

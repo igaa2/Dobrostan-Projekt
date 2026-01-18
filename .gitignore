@@ -1,4 +1,6 @@
 .venv
+.vscode
 *.egg-info
 **/__pycache__
 /src/bdl/database/
+build/

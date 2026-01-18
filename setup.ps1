@@ -19,3 +19,4 @@ Write-Host "Installing project dependencies..."
 Write-Host "Setup is done."
 
 # pip freeze > requirements.txt
+# Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned

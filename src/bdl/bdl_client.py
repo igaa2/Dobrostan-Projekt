@@ -24,7 +24,7 @@ class BDLClient:
         self.variables = config["variables"]
         self.years_from = config.get("years_from", 2020)
         self.timeout = (10, 30)
-        self.time_to_sleep = 10
+        self.time_to_sleep = 3
 
     def close_session(self):
         """Zamyka sesję, jeśli została utworzona."""
@@ -75,6 +75,7 @@ class BDLClient:
         r.raise_for_status()
         return r.json()
 
+    # TODO mozna podmienic by do bazy danych od razu wrzucało - a nie po całej pętli
     def _get_variables_data(self) -> dict:
         unit_levels = self.params.get("level", [])
         data = {}
@@ -102,6 +103,9 @@ class BDLClient:
             for v in unit.get("values", [])
         ]
 
+
+# TODO można dopisać pobieranie konkretnego roku czy coś
+# i odświeżanie wtedy za pomocą strealit też tu (mało zapytań)
 
 if __name__ == "__main__":
     from src.utils.utils import load_yaml, get_project_root

@@ -1,0 +1,3 @@
+state_session_key:
+  weight_prefix: "weight_"
+  stim_prefix: "stim_"

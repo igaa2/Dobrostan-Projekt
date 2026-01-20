@@ -1,16 +1,15 @@
-$pythonExe = "python3.12"
-
 # Check Python version
-$version = & $pythonExe --version
+$version = & python --version
 Write-Host "Using Python version: $version"
 
 Write-Host "Creating virtual environment..."
-& python3.12 -m venv venv
+& python -m venv .venv
 
 Write-Host "Activating virtual environment..."
 & .\.venv\Scripts\Activate.ps1
 
-python -m pip install --upgrade pip
+Write-Host "Upgrading pip..."
+& python -m pip install --upgrade pip
 
 Write-Host "Installing project dependencies..."
 # & pip install . # dla usera

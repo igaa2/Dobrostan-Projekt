@@ -1,5 +1,5 @@
-Data is provided by the API for a single variable
-across multiple territorial units.
+Dane są dostarczane przez API dla pojedynczej zmiennej
+w wielu jednostkach terytorialnych.
 
 5 - powiaty 2 - wojewodztwa 0 - Polska
 

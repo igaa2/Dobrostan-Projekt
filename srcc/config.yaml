@@ -1,0 +1,62 @@
+data:
+  params:
+    unit-level: 2  # 5
+    format: json
+    page-size: 16  # max 100
+  years_from: 2018
+  variables:
+    - id: 7737
+      name: Przeciętne miesięczne wydatki
+      type: stymulanta
+      weight: 50
+    - id: 1725015
+      name: Wskaźnik urbanizacji
+      type: stymulanta
+      weight: 50
+    - id: 155037
+      name: Poszkodowani w wypadkach przy pracy
+      type: destymulanta
+      weight: 50
+    - id: 1609531
+      name: Liczba zatrudnionych na stanowiskach pracy, w których wyeliminowano lub ograniczono ryzyko zawodowe
+      type: stymulanta
+      weight: 50
+    - id: 454185
+      name: Liczba lekarzy
+      type: stymulanta
+      weight: 50
+    - id: 1365344
+      name: Liczba prób samobójczych
+      type: destymulanta
+      weight: 50
+    - id: 1632971
+      name: Wskaźnik osób dorosłych uczestniczących w kształceniu lub szkoleniu w wieku 25-64 lata
+      type: stymulanta
+      weight: 50
+    - id: 60189
+      name: Księgozbiór bibliotek
+      type: stymulanta
+      weight: 50
+    - id: 288082
+      name: Długość drogi dla rowerów
+      type: stymulanta
+      weight: 50
+    - id: 1724791
+      name: Powierzchnia parków, zieleńców i terenów zieleni osiedlowej
+      type: stymulanta
+      weight: 50
+    - id: 1606668
+      name: Subiektywna pozytywna (dobra) ocena sytuacji materialnej gospodarstw domowych
+      type: stymulanta
+      weight: 50
+  database_name: dobrostan.db
+request:
+  retries:
+    max_retries: 3  # Ile razy ponowić próbę po błędzie
+    backoff_factor: 1  # Mnożnik czasu między próbami, wzór: {backoff_factor} × (2 ^ {numer_próby})
+    status_forcelist:  # Kody HTTP które wymuszają ponowienie
+    - 500  # Internal Server Error (błąd serwera)
+    - 502  # Bad Gateway (serwer proxy nie może połączyć się z serwerem)
+    - 503  # Service Unavailable (serwer przeciążony/w trakcie maintenance)
+    - 504  # Gateway Timeout (serwer proxy nie doczekał się odpowiedzi)
+  sleep_between_requests: 2  # Przerwa między requestami (by nie przeciążyć API)

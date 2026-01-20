@@ -37,4 +37,4 @@ where = ["src"]  # start with src catalog
 include = ["src", "src.**"]
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.yaml", "*.csv"]
+"*" = ["*.json", "*.yaml"]

@@ -43,15 +43,18 @@ def load_md(path: str | Path) -> str:
     return content
 
 
-def get_current_time() -> str:
-    """Zwraca aktualny czas w formacie 'YYYY-MM-DD HH:MM:SS'."""
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    logger.info(f"Current time generated: {current_time}")
-    return current_time
+# def get_current_time() -> str:
+#     """Zwraca aktualny czas w formacie 'YYYY-MM-DD HH:MM:SS'."""
+#     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     logger.info(f"Current time generated: {current_time}")
+#     return current_time
 
 
-def get_current_year() -> int:
-    """Zwraca aktualny rok."""
-    year = datetime.now().year
-    logger.info(f"Current year retrieved: {year}")
-    return year
+# def get_current_year() -> int:
+#     """Zwraca aktualny rok."""
+#     year = datetime.now().year
+#     logger.info(f"Current year retrieved: {year}")
+#     return year
+
+if __name__ == "__main__":
+    print(get_project_root())

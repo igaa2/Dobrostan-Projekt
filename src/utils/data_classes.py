@@ -1,4 +1,4 @@
-from dataclasses import dataclass, astuple
+from dataclasses import dataclass
 from typing import Any, Type, Literal
 from enum import Enum
 

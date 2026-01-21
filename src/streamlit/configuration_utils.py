@@ -12,7 +12,7 @@ def configurate_page() -> None:
         page_icon="📊",
         layout="wide",  # page elements use the entire screen width
         initial_sidebar_state="expanded",
-        menu_items={"About": load_md(get_project_root() / "dashboard" / "about.md")},
+        menu_items={"About": load_md(get_project_root() / "streamlit" / "about.md")},
     )
     logger.info("Streamlit page configured.")
 

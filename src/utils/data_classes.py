@@ -7,9 +7,7 @@ class SessionStatePrefix(Enum):
     """Prefiksy wykorzystywane przy tworzeniu kluczy w session_state."""
 
     SLIDER = "wagi"
-    # SLIDER_TMP = "tmpwagi"
     TOGGLE = "typy"
-    # TOGGLE_TMP = "tmptypy"
 
     def key(self, *parts: Any) -> str:
         return f"{self.value}_{'_'.join(map(str, parts))}"

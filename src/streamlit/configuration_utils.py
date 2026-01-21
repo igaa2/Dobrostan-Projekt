@@ -40,17 +40,9 @@ def ensure_session_state(variables: list[Variable]) -> None:
             SessionStatePrefix.SLIDER.key(variable.variable_id), variable.weight
         )
 
-        # st.session_state.setdefault(
-        #     SessionStatePrefix.SLIDER_TMP.key(variable.variable_id), variable.weight
-        # )
-
         st.session_state.setdefault(
             SessionStatePrefix.TOGGLE.key(variable.variable_id), variable.stimulant
         )
-
-        # st.session_state.setdefault(
-        #     SessionStatePrefix.TOGGLE_TMP.key(variable.variable_id), variable.weight
-        # )
 
 
 def warn_if_all_sliders_zero() -> bool:
@@ -66,7 +58,6 @@ def warn_if_all_sliders_zero() -> bool:
         v
         for k, v in st.session_state.items()
         if k.startswith(SessionStatePrefix.SLIDER.value)
-        # if k.startswith(SessionStatePrefix.SLIDER_TMP.value)
     ]
 
     if weights and all(v == 0 for v in weights):
@@ -118,30 +109,16 @@ def generate_sliders_and_toggles_for_variables(
         generate_slider(
             container=col_slider,
             session_state_key=SessionStatePrefix.SLIDER.key(variable.variable_id),
-            # session_state_key=SessionStatePrefix.SLIDER_TMP.key(variable.variable_id),
             name=variable.name,
         )
 
         generate_toggle(
             container=col_toggle,
             session_state_key=SessionStatePrefix.TOGGLE.key(variable.variable_id),
-            # session_state_key=SessionStatePrefix.TOGGLE_TMP.key(variable.variable_id),
         )
 
     st.sidebar.markdown("---")
     logger.info("Sliders and toggles generated in sidebar.")
-
-
-# def activate_variables_settings(variables: list[Variable]):
-#     """Finalizuje ustawienia wag i stymulant zgromadzone w tymczasowych zmiennych."""
-#     for variable in variables:
-#         st.session_state[SessionStatePrefix.SLIDER.key(variable.variable_id)] = (
-#             st.session_state[SessionStatePrefix.SLIDER_TMP.key(variable.variable_id)]
-#         )
-
-#         st.session_state[SessionStatePrefix.TOGGLE.key(variable.variable_id)] = (
-#             st.session_state[SessionStatePrefix.TOGGLE_TMP.key(variable.variable_id)]
-#         )
 
 
 def reset_session_state_by_prefix(prefix: str) -> None:

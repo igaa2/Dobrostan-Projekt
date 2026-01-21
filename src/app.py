@@ -2,7 +2,7 @@ from loguru import logger
 import streamlit as st
 
 from src.utils.data_classes import Variable, SessionStatePrefix, DataParams
-from src.utils.utils import get_project_root, load_md, load_yaml
+from src.utils.utils import get_project_root, load_yaml
 from src.streamlit.configuration_utils import (
     configurate_page,
     configure_sidebar,
@@ -10,7 +10,6 @@ from src.streamlit.configuration_utils import (
     ensure_session_state,
     generate_sliders_and_toggles_for_variables,
     reset_session_state_by_prefix,
-    # activate_variables_settings,
     warn_if_all_sliders_zero,
 )
 from src.streamlit.data_utils import (
@@ -78,7 +77,6 @@ def main():
             use_container_width=True,
         ):
             reset_session_state_by_prefix(SessionStatePrefix.SLIDER.value)
-            # reset_session_state_by_prefix(SessionStatePrefix.SLIDER_TMP.value)
             st.rerun()
 
     with col_reset_toggles:
@@ -87,20 +85,10 @@ def main():
             use_container_width=True,
         ):
             reset_session_state_by_prefix(SessionStatePrefix.TOGGLE.value)
-            # reset_session_state_by_prefix(SessionStatePrefix.TOGGLE_TMP.value)
             st.rerun()
-
-    # if st.sidebar.button("✅ Zastosuj konfigurację", use_container_width=True):
-    #     activate_variables_settings(variables)
-    #     st.session_state["flag"] = True
-    #     st.rerun()
 
     # ==================== PRZELICZENIE WSKAŹNIKA ====================
 
-    # flag = st.session_state.get("flag", True)
-    # if flag:
-    # flag = False
-    # indent zrobic do końca
     weights = SessionStatePrefix.extract_sliders_keys(dictionary=st.session_state)
     stimulants = SessionStatePrefix.extract_toggles_keys(dictionary=st.session_state)
 

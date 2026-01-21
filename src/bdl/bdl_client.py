@@ -1,118 +1,108 @@
+import pandas as pd
 from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-import time
+from loguru import logger
+from src.utils.data_classes import DataParams
 
 
 class BDLClient:
-    """Klient do API Banku Danych Lokalnych"""
+    """Klient do API Banku Danych Lokalnych."""
 
-    BASE_URL = "https://bdl.stat.gov.pl/api/v1"
+    BASE_URL: str = "https://bdl.stat.gov.pl/api/v1"
 
-    def __init__(self, config: dict):
-        self.session = Session()
-        retries = config.get("retries", {})
+    def __init__(self, params: DataParams):
+        self.params = params
+
+        self.session: Session | None = None
         self.retry = Retry(
-            total=retries.get("max_retries", 3),
-            backoff_factor=retries.get("backoff_factor", 1),
-            status_forcelist=retries.get("status_forcelist", []),
+            total=3,  # Ile razy ponowić próbę po błędzie
+            backoff_factor=1,  # Mnożnik czasu między próbami, wzór: {backoff_factor} × (2 ^ {numer_próby})
+            status_forcelist=[  # Kody HTTP które wymuszają ponowienie
+                500,  # Internal Server Error (błąd serwera)
+                502,  # Bad Gateway (serwer proxy nie może połączyć się z serwerem)
+                503,  # Service Unavailable (serwer przeciążony/w trakcie maintenance)
+                504,  # Gateway Timeout (serwer proxy nie doczekał się odpowiedzi)
+            ],
         )
-        self.adapter = HTTPAdapter(max_retries=self.retry)
-        self.session.mount("https://", self.adapter)
 
-        self.params = config["params"]
-        self.variables = config["variables"]
-        self.years_from = config.get("years_from", 2020)
-        self.timeout = (10, 30)
-        self.time_to_sleep = 3
+    def open(self) -> "BDLClient":
+        """Otwiera sesję HTTP."""
+        if self.session is not None:
+            self.close()
 
-    def close_session(self):
-        """Zamyka sesję, jeśli została utworzona."""
+        self.session = Session()
+        adapter = HTTPAdapter(max_retries=self.retry)
+        self.session.mount("https://", adapter)
+        logger.info("HTTP session opened.")
+        return self
+
+    def close(self) -> None:
+        """Zamyka sesję HTTP."""
         if self.session:
             self.session.close()
             self.session = None
+            logger.info("HTTP session closed.")
 
-    def _fetch_all_units(self) -> dict:
-        """Zwraca wszystkie wybrane do pobrania jednostki."""
-        url = f"{BDLClient.BASE_URL}/Units"
-        r = self.session.get(url, params=self.params, timeout=self.timeout)
-        r.raise_for_status()
-        return r.json().get("results", [])
+    def __enter__(self) -> "BDLClient":
+        """Inicjalizuje sesję HTTP (with)."""
+        return self.open()
 
-    def _get_unit_id(self) -> list[str]:
-        """Zwraca id jednostki."""
-        json_units = self._fetch_all_units()
-        return [json_unit["id"] for json_unit in json_units]
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Zamyka sesję HTTP (with); exc_type/exc_val/exc_tb to typ, obiekt i traceback wyjątku (None gdy brak błędu)."""
+        self.close()
 
-    def get_unit_id_name_tuples(self) -> list[tuple[str, str]]:
-        """Zwraca pary z id i nazwą jednostki."""
-        json_units = self._fetch_all_units()
-        return [(json_unit["id"], json_unit["name"]) for json_unit in json_units]
+    # ==================== Pobieranie lat ====================
 
-    def get_var_id_name_tuples(self) -> list[tuple[str, str]]:
-        """Zwraca pary z id i nazwą zmiennej."""
-        return [(json_var["id"], json_var["name"]) for json_var in self.variables]
+    def fetch_available_years_for_variable(self, variable_id: int) -> list[int]:
+        """Pobiera dostępne lata dla zmiennej."""
+        url = f"{self.BASE_URL}/variables/{variable_id}"
 
-    def _fetch_variable_all_years(self, var_id: int) -> list[int]:
-        """Zwraca możliwe do pobrania lata dla zmiennej var_id."""
-        url = f"{BDLClient.BASE_URL}/variables/{var_id}"
-        r = self.session.get(url, timeout=self.timeout)
-        r.raise_for_status()
-        return r.json().get("years", [])
+        logger.info(f"Fetching available years for variable {variable_id}...")
+        response = self.session.get(url)
+        response.raise_for_status()
 
-    def _get_variable_selected_years(self, var_id: int) -> list[int]:
-        """Zwraca możliwe do pobrania lata dla zmiennej var_id począwszy od self.years_from."""
-        all_years = self._fetch_variable_all_years(var_id)
-        return [year for year in all_years if year >= self.years_from]
+        years = response.json().get("years", [])
+        logger.info(f"Available years for {variable_id}: {years}")
+        return years
 
-    def _fetch_variable_data(self, var_id: int, unit_level: int) -> dict:
-        """Zwraca dane dla zmiennej var_id z dostępnych do pobrania lat począwszy od self.years_from."""
-        url = f"{BDLClient.BASE_URL}/data/by-variable/{var_id}"
-        years = self._get_variable_selected_years(var_id)
-        params = self.params | {"year": years, "unit-level": unit_level}
+    # ==================== Pobieranie danych ====================
 
-        r = self.session.get(url, params=params, timeout=self.timeout)
-        r.raise_for_status()
-        return r.json()
+    def fetch_most_recent_year_data(self, variable_id: int) -> pd.DataFrame:
+        """Pobiera dane z najnowszego dostępnego roku dla podanej zmiennej."""
+        url = f"{self.BASE_URL}/data/by-variable/{variable_id}"
+        years = self.fetch_available_years_for_variable(variable_id=variable_id)
+        year = max(years)
 
-    # TODO mozna podmienic by do bazy danych od razu wrzucało - a nie po całej pętli
-    def _get_variables_data(self) -> dict:
-        unit_levels = self.params.get("level", [])
-        data = {}
-        for var in self.variables:
-            var_id = var["id"]
-            results = []
-            for unit_level in unit_levels:
-                time.sleep(self.time_to_sleep)
-                try:
-                    json = self._fetch_variable_data(var_id, unit_level)
-                    print(f"wykonano dla {var_id}, {unit_level}.")
-                except Exception as e:
-                    json = {}
-                    print(f"nie wykonano dla {var_id}, {unit_level}, błąd: {e}")
-                results += json.get("results", [])
-            data[var_id] = results
-        return data
+        logger.info(f"Fetching data for variable {variable_id} for year: {year}")
+        params = self.params.to_dict() | {"year": year}
+        response = self.session.get(url, params=params)
+        response.raise_for_status()
 
-    def get_variables_tuples(self) -> list[tuple[str, str, int, float]]:
-        data = self._get_variables_data()
-        return [
-            (str(var_id), unit["id"], int(v["year"]), float(v["val"]))
-            for var_id, units in data.items()
-            for unit in units
-            for v in unit.get("values", [])
-        ]
+        results = response.json().get("results", [])
+        df = pd.DataFrame(
+            [
+                {
+                    "unit_id": d["id"],
+                    "unit_name": d["name"],
+                    "year": v["year"],
+                    "value": v["val"],
+                }
+                for d in results
+                for v in d["values"]
+            ]
+        )
+        logger.info(f"Fetched {len(df)} units for variable {variable_id}.")
+        return df
 
-
-# TODO można dopisać pobieranie konkretnego roku czy coś
-# i odświeżanie wtedy za pomocą strealit też tu (mało zapytań)
 
 if __name__ == "__main__":
-    from src.utils.utils import load_yaml, get_project_root
+    from src.utils.utils import get_project_root, load_yaml
 
-    config_path = get_project_root() / "bdl" / "config" / "config.yaml"
-    config = load_yaml(config_path)
+    root = get_project_root()
+    config = load_yaml(root / "config.yaml")
+    data_params = DataParams.from_dict(config["data"]["params"])
 
-    client = BDLClient(config)
-    print(client.get_variables_tuples())
-    client.close_session()
+    with BDLClient(params=data_params) as client:
+        results = client.fetch_most_recent_year_data(variable_id=7737)
+        print(results)

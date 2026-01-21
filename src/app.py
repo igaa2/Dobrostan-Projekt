@@ -1,9 +1,9 @@
 from loguru import logger
 import streamlit as st
 
-from srcc.new_wave.data_classes import Variable, SessionStatePrefix, DataParams
-from srcc.utils.utils import get_project_root, load_md, load_yaml
-from srcc.new_wave.streamlit.configuration_utils import (
+from src.utils.data_classes import Variable, SessionStatePrefix, DataParams
+from src.utils.utils import get_project_root, load_md, load_yaml
+from src.streamlit.configuration_utils import (
     configurate_page,
     configure_sidebar,
     configurate_main,
@@ -13,18 +13,18 @@ from srcc.new_wave.streamlit.configuration_utils import (
     # activate_variables_settings,
     warn_if_all_sliders_zero,
 )
-from srcc.new_wave.streamlit.data_utils import (
+from src.streamlit.data_utils import (
     fetch_most_recent_year_data_for_variables,
     normalize_per_variable,
     validate_and_extract_validation,
 )
-from srcc.new_wave.streamlit.plots import (
+from src.streamlit.plots import (
     create_map,
     create_horizontal_barplot_with_mean_line,
     create_radar,
 )
-from srcc.new_wave.composite_index.validator import VariableValidator
-from srcc.new_wave.composite_index.copras import (
+from src.composite_index.validator import VariableValidator
+from src.composite_index.copras import (
     calculate_copras,
     calculate_hybrid_weights,
 )

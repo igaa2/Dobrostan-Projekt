@@ -1,8 +1,8 @@
 import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 from loguru import logger
-from srcc.utils.utils import get_project_root, load_md
-from srcc.new_wave.data_classes import Variable, SessionStatePrefix
+from src.utils.utils import get_project_root, load_md
+from src.utils.data_classes import Variable, SessionStatePrefix
 
 
 def configurate_page() -> None:

@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 from time import sleep
 from loguru import logger
-from srcc.new_wave.data_classes import Variable
-from srcc.new_wave.bdl.bdl_client import BDLClient, DataParams
-from srcc.new_wave.composite_index.validator import VariableValidator
+from src.utils.data_classes import Variable
+from src.bdl.bdl_client import BDLClient, DataParams
+from src.composite_index.validator import VariableValidator
 
 
 # ==================== POBIERANIE DANYCH ====================
@@ -87,7 +87,7 @@ def normalize_per_variable(
 
 
 if __name__ == "__main__":
-    from srcc.utils.utils import get_project_root, load_yaml
+    from src.utils.utils import get_project_root, load_yaml
 
     root = get_project_root()
     config = load_yaml(root / "config.yaml")

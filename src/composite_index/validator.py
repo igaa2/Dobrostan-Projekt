@@ -2,7 +2,7 @@ import pandas as pd
 from scipy import stats
 from loguru import logger
 
-from srcc.new_wave.data_classes import VariableQuality, ValidationStatus
+from src.utils.data_classes import VariableQuality, ValidationStatus
 
 
 class VariableValidator:

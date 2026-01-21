@@ -1,12 +1,3 @@
-"""
-Metoda COPRAS do budowy wskaźnika kompozytowego.
-
-Zawiera:
-- Normalizację wektorową
-- Obliczanie wag CV-based
-- Kalkulator COPRAS
-"""
-
 import pandas as pd
 import numpy as np
 from loguru import logger
@@ -19,11 +10,8 @@ from srcc.utils.dataclasses import (
     UnitScore,
     CoprasResult,
 )
-from srcc.index.weights_calculator import calculate_weights_for_year
-from srcc.index.normalizer import normalize
-
-
-# ==================== COPRAS ====================
+from srcc.index.weights_calculator import calculate_weights_per_variable_for_year
+from srcc.index.normalizer import normalize_per_variable_and_year
 
 
 class Copras:
@@ -156,7 +144,7 @@ class Copras:
         else:
             if "value" not in df_year.columns:
                 raise ValueError("Need 'value' column to calculate CV-based weights")
-            weights = calculate_weights_for_year(df_year, year)
+            weights = calculate_weights_per_variable_for_year(df_year, year)
 
         # Normalizuj wagi do sumy = 1
         total = sum(weights.values())
@@ -238,7 +226,7 @@ class Copras:
         logger.info("Starting COPRAS pipeline")
 
         # Normalizacja
-        df_normalized = normalize(df)
+        df_normalized = normalize_per_variable_and_year(df)
 
         # Połącz z oryginalnymi wartościami (potrzebne do CV)
         df_full = df_normalized.merge(

@@ -189,6 +189,9 @@ if weights and all(v == 0 for v in weights.values()):
         "Nie można porównać jednostek — ustaw co najmniej jedną wagę większą od 0."
     )
 
+print("wagi sidebar:", get_keys(prefix=prefix_weights))
+print("typy sidebar:", get_keys(prefix=prefix_stim))
+
 # ==================== GŁÓWNY PANEL ====================
 st.title("📊 Dobrostan Województw Polski")
 st.markdown("---")

@@ -7,13 +7,11 @@ from srcc.index.validator import VariableValidator
 # ==================== WAGI ====================
 
 
-def calculate_weights_for_year(df: pd.DataFrame, year: int) -> dict[str, float]:
-    """
-    Oblicza wagi CV-based dla danego roku.
-
-    Wzór: w_j = CV_j / Σ CV
-    """
-    df_year = df[df["year"] == year]
+def calculate_weights_per_variable_for_year(
+    df: pd.DataFrame, year: int
+) -> dict[str, float]:
+    """Oblicza wagi CV-based dla danego roku. Wzór: w_j = CV_j / Σ CV"""
+    df_year = df[df["year"] == year].copy()
 
     cv_per_var = df_year.groupby("variable_id")["value"].agg(
         VariableValidator.calculate_cv
@@ -23,12 +21,9 @@ def calculate_weights_for_year(df: pd.DataFrame, year: int) -> dict[str, float]:
     if abs(total_cv) < 1e-10:
         n = len(cv_per_var)
         logger.warning(f"Year {year}: All CV ≈ 0, using equal weights (1/{n})")
-        return {str(var_id): 1 / n for var_id in cv_per_var.index}
+        return {str(var_id): float(1 / n) for var_id in cv_per_var.index}
 
-    weights = {str(var_id): cv / total_cv for var_id, cv in cv_per_var.items()}
-
-    logger.debug(f"Year {year} weights: {weights}")
-
+    weights = {str(var_id): float(cv / total_cv) for var_id, cv in cv_per_var.items()}
     return weights
 
 
@@ -37,20 +32,7 @@ if __name__ == "__main__":
         {
             "variable_id": [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
             "unit_id": ["M", "S", "W", "M", "S", "W", "M", "S", "W", "M", "S", "W"],
-            "year": [
-                2022,
-                2022,
-                2022,
-                2022,
-                2022,
-                2022,
-                2023,
-                2023,
-                2023,
-                2023,
-                2023,
-                2023,
-            ],
+            "year": [2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3],
             "value_normalized": [
                 0.8,
                 0.4,
@@ -69,5 +51,5 @@ if __name__ == "__main__":
         }
     )
 
-    cv_weights = calculate_weights_for_year(df, year=2022)
+    cv_weights = calculate_weights_per_variable_for_year(df, year=2)
     print(cv_weights)

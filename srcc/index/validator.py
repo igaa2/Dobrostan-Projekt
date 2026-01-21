@@ -175,13 +175,18 @@ class VariableValidator:
 if __name__ == "__main__":
     from srcc.utils.utils import get_project_root, load_yaml
 
-    root = get_project_root()
-    config = load_yaml(root / "config.yaml")
+    df = pd.DataFrame(
+        data=[
+            # zmienna 1 (najświeższy rok 2024)
+            {"variable_id": "v1", "unit_id": "u1", "year": 2024, "value": 10},
+            {"variable_id": "v1", "unit_id": "u2", "year": 2024, "value": 10},
+            # zmienna 2 (najświeższy rok 2024)
+            {"variable_id": "v2", "unit_id": "u1", "year": 2024, "value": 30},
+            {"variable_id": "v2", "unit_id": "u2", "year": 2024, "value": 40},
+        ]
+    )
 
-    database = BDLDatabase(config["data"].get("database_name", None)).init_db()
-    df = database.get_raw_data()
-    logger.info(f"Raw data loaded from database (rows={len(df)})")
-
-    validator = VariableValidator(database=database)
-    results = validator.validate_dataframe(df, save=True)
+    validator = VariableValidator()
+    results = validator.validate_dataframe(df)
+    print(results)
     logger.info(f"Validation finished. Total results: {len(results)}")

@@ -3,24 +3,31 @@ import streamlit as st
 
 from srcc.new_wave.data_classes import Variable, SessionStatePrefix, DataParams
 from srcc.utils.utils import get_project_root, load_md, load_yaml
-from srcc.new_wave.dashboard.configuration_utils import (
+from srcc.new_wave.streamlit.configuration_utils import (
     configurate_page,
     configure_sidebar,
     configurate_main,
     ensure_session_state,
     generate_sliders_and_toggles_for_variables,
     reset_session_state_by_prefix,
+    # activate_variables_settings,
     warn_if_all_sliders_zero,
 )
-from srcc.new_wave.bdl.bdl_utils import fetch_most_recent_year_data_for_variables
-from srcc.new_wave.dashboard.plots import (
+from srcc.new_wave.streamlit.data_utils import (
+    fetch_most_recent_year_data_for_variables,
+    normalize_per_variable,
+    validate_and_extract_validation,
+)
+from srcc.new_wave.streamlit.plots import (
     create_map,
     create_horizontal_barplot_with_mean_line,
     create_radar,
 )
 from srcc.new_wave.composite_index.validator import VariableValidator
-from srcc.new_wave.composite_index.normalizer import normalize_per_variable
-from srcc.new_wave.composite_index.copras import calculate_copras, calculate_weights
+from srcc.new_wave.composite_index.copras import (
+    calculate_copras,
+    calculate_hybrid_weights,
+)
 
 
 def main():
@@ -39,12 +46,10 @@ def main():
     df_oryginal = fetch_most_recent_year_data_for_variables(
         variables=variables,
         params=data_params,
-        sleep_between_requests=1.0,
+        sleep_between_requests=0.5,
     )
 
-    validation = VariableValidator().validate_dataframe(df=df_oryginal)
-    validation_infos = {v.variable_id: v.validation_info() for v in validation}
-    validation_cv = {v.variable_id: v.cv for v in validation}  # do wag
+    validation_infos, validation_cv = validate_and_extract_validation(df=df_oryginal)
 
     df_normalized = normalize_per_variable(df=df_oryginal)
 
@@ -71,30 +76,40 @@ def main():
         if st.button(
             f"🔄⚖️ Resetuj {SessionStatePrefix.SLIDER.value}",
             use_container_width=True,
-            on_click=reset_session_state_by_prefix,
-            kwargs={"prefix": SessionStatePrefix.SLIDER.value},
         ):
+            reset_session_state_by_prefix(SessionStatePrefix.SLIDER.value)
+            # reset_session_state_by_prefix(SessionStatePrefix.SLIDER_TMP.value)
             st.rerun()
 
     with col_reset_toggles:
         if st.button(
             f"🔄📉 Resetuj {SessionStatePrefix.TOGGLE.value}",
             use_container_width=True,
-            on_click=reset_session_state_by_prefix,
-            kwargs={"prefix": SessionStatePrefix.TOGGLE.value},
         ):
+            reset_session_state_by_prefix(SessionStatePrefix.TOGGLE.value)
+            # reset_session_state_by_prefix(SessionStatePrefix.TOGGLE_TMP.value)
             st.rerun()
+
+    # if st.sidebar.button("✅ Zastosuj konfigurację", use_container_width=True):
+    #     activate_variables_settings(variables)
+    #     st.session_state["flag"] = True
+    #     st.rerun()
 
     # ==================== PRZELICZENIE WSKAŹNIKA ====================
 
+    # flag = st.session_state.get("flag", True)
+    # if flag:
+    # flag = False
+    # indent zrobic do końca
+    weights = SessionStatePrefix.extract_sliders_keys(dictionary=st.session_state)
+    stimulants = SessionStatePrefix.extract_toggles_keys(dictionary=st.session_state)
+
     df_index = calculate_copras(
         df=df_normalized,
-        weights=calculate_weights(validation_cv=validation_cv),
-        destimulants={
-            k.removeprefix(SessionStatePrefix.TOGGLE.value): v
-            for k, v in st.session_state.items()
-            if k.startswith(SessionStatePrefix.TOGGLE.value)
-        },
+        weights=calculate_hybrid_weights(
+            validation_cv=validation_cv, slider_weights=weights
+        ),
+        stimulants=stimulants,
     )
 
     # ==================== KONFIGURACJA PANELU GŁÓWNEGO ====================

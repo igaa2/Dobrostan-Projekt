@@ -6,11 +6,31 @@ from enum import Enum
 class SessionStatePrefix(Enum):
     """Prefiksy wykorzystywane przy tworzeniu kluczy w session_state."""
 
-    SLIDER = "wagi_"
-    TOGGLE = "typy_"
+    SLIDER = "wagi"
+    # SLIDER_TMP = "tmpwagi"
+    TOGGLE = "typy"
+    # TOGGLE_TMP = "tmptypy"
 
     def key(self, *parts: Any) -> str:
-        return f"{self.value}{'_'.join(map(str, parts))}"
+        return f"{self.value}_{'_'.join(map(str, parts))}"
+
+    def extract(self, dictionary: dict[str, Any]) -> dict[str, Any]:
+        """Wyciąga z dict tylko klucze z danym prefiksem."""
+        return {
+            int(k[len(self.value) + 1 :]): v
+            for k, v in dictionary.items()
+            if isinstance(k, str) and k.startswith(self.value)
+        }
+
+    @classmethod
+    def extract_sliders_keys(cls, dictionary: dict[str, Any]) -> dict[str, Any]:
+        """Zwraca słownik z wagami."""
+        return cls.SLIDER.extract(dictionary)
+
+    @classmethod
+    def extract_toggles_keys(cls, dictionary: dict[str, Any]) -> dict[str, Any]:
+        """Zwraca słownik z indykatorem destymulant."""
+        return cls.TOGGLE.extract(dictionary)
 
 
 class ValidationStatus(Enum):
@@ -73,7 +93,7 @@ class Variable:
 class VariableQuality:
     """Metryki jakości zmiennej."""
 
-    variable_id: str
+    variable_id: int
     year: int
     na: float
     cv: float

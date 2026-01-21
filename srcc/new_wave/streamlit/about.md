@@ -22,5 +22,5 @@ aby ich suma wynosiła 100%.
 
 ---
 **Wersja:** 1.0.0  
-**Autor:** Twoje Imię  
+**Autor:** Agnieszka Góral
 **Dane:** Przykładowe

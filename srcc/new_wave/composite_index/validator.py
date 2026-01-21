@@ -41,9 +41,9 @@ class VariableValidator:
         return status
 
     def validate(
-        self, values: pd.Series, correlations: pd.Series, variable_id: str, year: int
+        self, values: pd.Series, correlations: pd.Series, variable_id: int, year: int
     ) -> VariableQuality:
-        """Waliduje zmienną."""
+        """Waliduje pojedynczą zmienną."""
         na = self.calculate_na(values)
 
         clean = values.dropna()
@@ -82,37 +82,124 @@ class VariableValidator:
             status=status,
         )
 
-    def validate_dataframe(self, df: pd.DataFrame) -> list[VariableQuality]:
-        logger.info(f"Starting validation for DataFrame with {len(df)} rows")
+    def validate_dataframe(
+        self,
+        df: pd.DataFrame,
+        variable_col_name: str = "variable_id",
+        unit_col_name: str = "unit_id",
+        year_col_name: str = "year",
+        value_col_name: str = "value",
+    ) -> list[VariableQuality]:
+        """Waliduje DataFrame."""
 
         # Pivot i korelacje
-        pivot = df.pivot(index="unit_id", columns="variable_id", values="value")
-        corr = pivot.corr()
-        print(corr)
+        corr = df.pivot(
+            index=unit_col_name, columns=variable_col_name, values=value_col_name
+        ).corr(method="pearson")
 
         qualities = []
-        for variable_id, group in df.groupby("variable_id"):
-            year = group["year"]
-            values = group["value"]
+        for variable_id, group in df.groupby(variable_col_name):
+            year = group[year_col_name].iloc[0]
+            values = group[value_col_name]
             correlations = corr.loc[variable_id].drop(variable_id)
-            qualities.append(self.validate(values, correlations, variable_id, year))
 
-        logger.info(f"Validation finished for {len(qualities)} variables")
+            qualities.append(
+                self.validate(values, correlations, int(variable_id), int(year))
+            )
+
+        logger.info(f"Validated {len(qualities)} variables")
         return qualities
 
 
 if __name__ == "__main__":
     df = pd.DataFrame(
-        data=[
-            # zmienna 1 (najświeższy rok 2024)
-            {"variable_id": "v1", "unit_id": "u1", "year": 2024, "value": 10},
-            {"variable_id": "v1", "unit_id": "u2", "year": 2024, "value": 10},
-            # zmienna 2 (najświeższy rok 2024)
-            {"variable_id": "v2", "unit_id": "u1", "year": 2024, "value": 30},
-            {"variable_id": "v2", "unit_id": "u2", "year": 2024, "value": 40},
-        ]
+        [
+            (
+                "011200000000",
+                "MAŁOPOLSKIE",
+                2024,
+                1659.01,
+                7737,
+                "Przeciętne miesięczne wydatki",
+            ),
+            (
+                "012400000000",
+                "ŚLĄSKIE",
+                2024,
+                1988.83,
+                7737,
+                "Przeciętne miesięczne wydatki",
+            ),
+            (
+                "020800000000",
+                "LUBUSKIE",
+                2024,
+                1747.05,
+                7737,
+                "Przeciętne miesięczne wydatki",
+            ),
+            (
+                "023000000000",
+                "WIELKOPOLSKIE",
+                2024,
+                1815.81,
+                7737,
+                "Przeciętne miesięczne wydatki",
+            ),
+            (
+                "011200000000",
+                "MAŁOPOLSKIE",
+                2024,
+                47.80,
+                1725015,
+                "Wskaźnik urbanizacji",
+            ),
+            ("012400000000", "ŚLĄSKIE", 2024, 75.70, 1725015, "Wskaźnik urbanizacji"),
+            ("020800000000", "LUBUSKIE", 2024, 64.00, 1725015, "Wskaźnik urbanizacji"),
+            (
+                "023000000000",
+                "WIELKOPOLSKIE",
+                2024,
+                52.90,
+                1725015,
+                "Wskaźnik urbanizacji",
+            ),
+            (
+                "011200000000",
+                "MAŁOPOLSKIE",
+                2024,
+                3.61,
+                155037,
+                "Poszkodowani w wypadkach przy pracy",
+            ),
+            (
+                "012400000000",
+                "ŚLĄSKIE",
+                2024,
+                6.68,
+                155037,
+                "Poszkodowani w wypadkach przy pracy",
+            ),
+            (
+                "020800000000",
+                "LUBUSKIE",
+                2024,
+                5.03,
+                155037,
+                "Poszkodowani w wypadkach przy pracy",
+            ),
+            (
+                "023000000000",
+                "WIELKOPOLSKIE",
+                2024,
+                4.80,
+                155037,
+                "Poszkodowani w wypadkach przy pracy",
+            ),
+        ],
+        columns=["unit_id", "unit_name", "year", "value", "variable_id", "name"],
     )
-    validator = VariableValidator()
-    results = validator.validate_dataframe(df)
+
+    results = VariableValidator().validate_dataframe(df)
     for r in results:
         print(r)
